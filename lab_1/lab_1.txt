@@ -21,12 +21,12 @@ afiseaza(maximum)
 nr1 ia_valoarea numar input("Enter value:")
 
 
-daca restul_impartirii(nr1,2) este 0:
+daca restul_impartirii(nr1,2) egal 0:
     afiseaza("nu este prim")
     termina_programul
 
 parcurge_numere(it,3,radical(nr1),2):
-    daca restul_impartirii(nr1,it) este 0:
+    daca restul_impartirii(nr1,it) egal 0:
         afiseaza("nu este prim")
         termina_programul
 
@@ -48,7 +48,7 @@ afiseaza(suma)
 n ia_valoarea num input("Enter value")
 
 parcurge_numere(it,1,n,1):
-    sir[it] ia_valoarea numar input("Enter value")
+      sir[it] ia_valoarea numar input("Enter value")
 
 suma ia_valoarea numar null
 
