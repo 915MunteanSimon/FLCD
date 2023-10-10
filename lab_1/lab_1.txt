@@ -1,0 +1,58 @@
+1.
+
+nr1 ia_valoarea numar input("Enter value:")
+nr2 ia_valoarea numar input("Enter value:")
+nr3 ia_valoarea numar input("Enter value:")
+
+maximum ia_valoarea null
+
+daca nr1 mai_mare nr2 si nr1 mai_mare nr3:
+    maximum ia_valoarea nr1
+daca nr2 mai_mare nr1 si nr2 mai_mare nr3:
+    maximum ia_valoarea nr2
+daca nr3 mai_mare nr1 si nr3 mai_mare nr2:
+    maximum ia_valoarea nr3
+
+afiseaza("The max is:")
+afiseaza(maximum)
+
+2.
+
+nr1 ia_valoarea numar input("Enter value:")
+
+
+daca restul_impartirii(nr1,2) este 0:
+    afiseaza("nu este prim")
+    termina_programul
+
+parcurge_numere(it,3,radical(nr1),2):
+    daca restul_impartirii(nr1,it) este 0:
+        afiseaza("nu este prim")
+        termina_programul
+
+afiseaza("este prim")
+
+3.
+
+n ia_valoarea numar input("Enter value")
+
+suma ia_valoarea numar null
+
+parcurge_numere(it,1,n,1):
+    suma ia_valoarea suma adauga it
+
+afiseaza(suma)
+
+4.
+
+n ia_valoarea num input("Enter value")
+
+parcurge_numere(it,1,n,1):
+    sir[it] ia_valoarea numar input("Enter value")
+
+suma ia_valoarea numar null
+
+parcurge_numere(it,1,n,1):
+    suma ia_valoarea suma adg it
+
+afiseaza(suma)
