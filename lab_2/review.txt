@@ -1,0 +1,3 @@
+Marco's documentation is impressively well-structured,
+making it a breeze for users to find what they need while keeping the explanations crystal clear.
+Your syntax examples are spot on, and the consistent use of terminology throughout adds to the document's quality.
