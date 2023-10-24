@@ -1,3 +1,5 @@
+https://github.com/915MunteanSimon/FLCD/tree/main/lab_3/lab_2
+
 For my SymbolTable I chose to implement one HashTable which can be used for both the identifiers
 table and constants table, as well as one single table which contains both of them.
 The approach for my hashtable is o have lists in lists, so basically, on each position from the list I have
