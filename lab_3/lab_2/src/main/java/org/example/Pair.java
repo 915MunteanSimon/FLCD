@@ -1,18 +1,18 @@
 package org.example;
 
-public class Pair {
-    private final Integer first;
-    private final Integer second;
+public class Pair<First,Second> {
+    private final First first;
+    private final Second second;
 
-    public Integer getFirst() {
+    public First getFirst() {
         return this.first;
     }
 
-    public Integer getSecond() {
+    public Second getSecond() {
         return this.second;
     }
 
-    public Pair(Integer first, Integer second) {
+    public Pair(First first, Second second) {
         this.first = first;
         this.second = second;
     }

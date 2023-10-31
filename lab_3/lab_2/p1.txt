@@ -1,0 +1,11 @@
+a ia_valoarea numar input()
+b ia_valoarea numar input()
+c ia_valoarea numar input()
+maximum ia_valoarea null
+daca a mai_mare b si a mai_mare c:
+    maximum ia_valoarea a
+daca c mai_mare a si b mai_mare c:
+    maximum ia_valoarea b
+daca c mai_mare a si c mai_mare b:
+    maximum ia_valoarea c
+afiseaza(maximum)

@@ -1,25 +1,28 @@
 package org.example;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 
 public class Main {
+    private static void printToFile(String filePath, Object object) {
+        try(PrintStream printStream = new PrintStream(filePath)) {
+            printStream.println(object);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void run(String filePath) {
+        MyScanner scanner = new MyScanner(filePath);
+        scanner.scan();
+        printToFile(filePath.replace(".txt", "ST.txt"), scanner.getSymbolTable());
+        printToFile(filePath.replace(".txt", "PIF.txt"), scanner.getPif());
+    }
+
     public static void main(String[] args) {
-        SymbolTable symbolTable = new SymbolTable(5);
-
-        symbolTable.add("1");
-        System.out.println(symbolTable.containsTerm("1"));
-        Pair position = symbolTable.findPositionOfTerm("1");
-        System.out.println(position);
-
-        symbolTable.add("6");
-        System.out.println(symbolTable.containsTerm("6"));
-        System.out.println(symbolTable.findPositionOfTerm("6"));
-
-
-        symbolTable.add("5");
-        System.out.println(symbolTable.containsTerm("5"));
-        System.out.println(symbolTable.findPositionOfTerm("5"));
-
-
-
-        System.out.println(symbolTable.getHashTable());
+        run("p1.txt");
+        run("p2.txt");
+        run("p3.txt");
+        run("p_err.txt");
     }
 }

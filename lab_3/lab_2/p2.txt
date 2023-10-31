@@ -1,0 +1,9 @@
+nr1 ia_valoarea numar input()
+daca restul_impartirii(nr1,2) egal 0:
+    afiseaza("nu este prim")
+    termina_programul
+parcurge_numere(it,3,radical(nr1),2):
+    daca restul_impartirii(nr1,it) egal 0:
+        afiseaza("nu este prim")
+        termina_programul
+afiseaza("este prim")

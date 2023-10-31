@@ -1,0 +1,7 @@
+n ia_valoarea numar input()
+parcurge_numere(it,1,n,1):
+      sir[it] ia_valoarea numar input()
+suma ia_valoarea numar null++
+parcurge_numere(it,1,n,1):
+    suma ia_valoarea suma adauga 1it
+afiseaza(suma)

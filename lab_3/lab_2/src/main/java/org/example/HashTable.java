@@ -14,7 +14,7 @@ public class HashTable {
         }
     }
 
-    public String findByPos(Pair pos){
+    public String findByPos(Pair<Integer, Integer> pos){
         if(this.table.size() <= pos.getFirst() || this.table.get(pos.getFirst()).size() <= pos.getSecond()){
             throw new IndexOutOfBoundsException("Invalid position");
         }
@@ -26,14 +26,14 @@ public class HashTable {
         return size;
     }
 
-    public Pair findPositionOfTerm(String term){
-        int pos = hash(term);
+    public Pair<Integer, Integer> findPositionOfTerm(String elem){
+        int pos = hash(elem);
 
         if(!table.get(pos).isEmpty()){
             ArrayList<String> elems = this.table.get(pos);
             for(int i = 0; i < elems.size(); i++){
-                if(elems.get(i).equals(term)){
-                    return new Pair(pos, i);
+                if(elems.get(i).equals(elem)){
+                    return new Pair<>(pos, i);
                 }
             }
         }
@@ -50,26 +50,35 @@ public class HashTable {
         return sum_chars % size;
     }
 
-    public boolean containsTerm(String term){
-        return this.findPositionOfTerm(term) != null;
+    public boolean containsTerm(String elem){
+        return this.findPositionOfTerm(elem) != null;
     }
 
-    public boolean add(String term){
-        if(containsTerm(term)){
+    public boolean add(String elem){
+        if(containsTerm(elem)){
             return false;
         }
 
-        Integer pos = hash(term);
+        Integer pos = hash(elem);
 
         ArrayList<String> elems = this.table.get(pos);
-        elems.add(term);
+        elems.add(elem);
 
         return true;
     }
 
     @Override
     public String toString() {
-        return "SymbolTable { " + "elements=" + table + ", size = " + size + " }";
+        StringBuilder computedString = new StringBuilder();
+        for(int i = 0; i < this.table.size(); i++){
+            if(this.table.get(i).size() > 0){
+                computedString.append(i);
+                computedString.append(" - ");
+                computedString.append(this.table.get(i));
+                computedString.append("\n");
+            }
+        }
+        return computedString.toString();
     }
 
 }
