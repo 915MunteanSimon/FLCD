@@ -109,9 +109,15 @@ class Grammar:
         return follow
 
     def build_ll1_table(self):
+        ll1_table = {}
+
         first = self.calculate_first()
         follow = self.calculate_follow(first)
-        ll1_table = {}
+
+        for A in self.N:
+            ll1_table[A] = {}
+            for terminal in self.E + [self.EPSILON]:
+                ll1_table[A][terminal] = None
 
         for A in self.N:
             for alpha in self.P[A]:
@@ -128,11 +134,11 @@ class Grammar:
 
                 for terminal in first_alpha:
                     if terminal != self.EPSILON:
-                        ll1_table[(A, terminal)] = alpha
+                        ll1_table[A][terminal] = alpha
 
                 if self.EPSILON in first_alpha:
                     for terminal in follow[A]:
-                        ll1_table[(A, terminal)] = alpha
+                        ll1_table[A][terminal] = alpha
 
         return ll1_table
 
@@ -173,7 +179,7 @@ class Grammar:
 
 
 g = Grammar()
-g.readFromFile("g1.txt")
+g.readFromFile("g2.txt")
 print(str(g))
 if g.checkCFG():
     print("The grammar is a CFG")
