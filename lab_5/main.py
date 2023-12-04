@@ -1,97 +1,181 @@
 class Grammar:
-    def _init_(self):
-        self.nonterminals = set()
-        self.terminals = set()
-        self.productions = {}
-        self.start_symbol = None
+    EPSILON = "epsilon"
 
-    def read_grammar_from_file(self, filename):
-        with open(filename, 'r') as file:
+    def __init__(self):
+        self.N = []
+        self.E = []
+        self.S = ""
+        self.P = {}
+
+    def __processLine(self, line: str):
+        # Get what comes after the '='
+        return line.strip().split(' ')[2:]
+
+    def readFromFile(self, file_name: str):
+        with open(file_name) as file:
+            N = self.__processLine(file.readline())
+            E = self.__processLine(file.readline())
+            S = self.__processLine(file.readline())[0]
+
+            file.readline()  # P =
+
+            # Get all transitions
+            P = {}
             for line in file:
-                line = line.strip()
-                if not line or line.startswith('#'):
-                    continue  # Skip empty lines and comments
+                split = line.strip().split('->')
+                source = split[0].strip()
+                sequence = split[1].lstrip(' ')
+                sequence_list = []
+                for c in sequence.split(' '):
+                    sequence_list.append(c)
 
-                parts = line.split('->')
-                if len(parts) != 2:
-                    raise ValueError(f"Invalid production: {line}")
-
-                left_side = parts[0].strip()
-                right_side = parts[1].strip()
-
-                if not right_side:
-                    raise ValueError(f"Invalid production: {line}")
-
-                if not self.start_symbol:
-                    self.start_symbol = left_side
-
-                self.nonterminals.add(left_side)
-
-                for symbol in right_side.split():
-                    if symbol.isupper():
-                        self.nonterminals.add(symbol)
-                    else:
-                        self.terminals.add(symbol)
-
-                if left_side in self.productions:
-                    self.productions[left_side].append(right_side)
+                if source in P.keys():
+                    P[source].append(sequence_list)
                 else:
-                    self.productions[left_side] = [right_side]
+                    P[source] = [sequence_list]
 
-    def print_nonterminals(self):
-        print("Nonterminals:", ', '.join(sorted(self.nonterminals)))
+            self.N = N
+            self.E = E
+            self.S = S
+            self.P = P
 
-    def print_terminals(self):
-        print("Terminals:", ', '.join(sorted(self.terminals)))
+    def eliminate_left_recursion(self):
+        for A in self.N:
+            for i in range(self.N.index(A)):
+                B = self.N[i]
+                if (A, B) in self.P:
+                    alpha = self.P[(A, B)]
+                    self.P.pop((A, B))
+                    for beta in self.P[B]:
+                        self.P.setdefault(A, []).extend(beta + alpha if beta != [self.EPSILON] else alpha)
 
-    def print_productions(self):
-        print("Productions:")
-        for nonterminal, productions in self.productions.items():
-            print(f"{nonterminal} -> {' | '.join(productions)}")
+    def factorize(self):
+        for A in self.N:
+            prods = self.P[A]
+            i = 0
+            while i < len(prods):
+                current_prod = prods[i]
+                if len(current_prod) > 1:
+                    for j in range(1, len(current_prod)):
+                        new_nonterminal = f"{A}factored{j}"
+                        if (new_nonterminal, current_prod[j]) not in self.P:
+                            self.P[(new_nonterminal, current_prod[j])] = [current_prod[j]]
+                        prods[i][j] = new_nonterminal
+                        A = new_nonterminal
+            i += 1
 
-    def productions_for_nonterminal(self, nonterminal):
-        if nonterminal in self.productions:
-            return self.productions[nonterminal]
-        else:
-            return []
+    def calculate_first(self):
+        first = {}
+        for A in self.N:
+            first[A] = set()
+        for a in self.E:
+            first[a] = set([a])
+        for A in self.N:
+            for alpha in self.P[A]:
+                i = 0
+                while i < len(alpha):
+                    B = alpha[i]
+                    first[A] |= first[B]
+                    if self.EPSILON not in first[B]:
+                        break
+                    i += 1
+                else:
+                    first[A].add(self.EPSILON)
+        return first
 
-    def is_nonterminal(self, symbol):
-        return symbol in self.nonterminals
+    def calculate_follow(self, first):
+        follow = {}
+        for A in self.N:
+            follow[A] = set()
+        follow[self.S].add('$')
+        changed = True
+        while changed:
+            changed = False
+            for A in self.N:
+                for alpha in self.P[A]:
+                    for i in range(len(alpha)):
+                        B = alpha[i]
+                        if B in self.N:
+                            rest = alpha[i + 1:]
+                            if i == len(alpha) - 1 or self.EPSILON in first[alpha[i + 1]]:
+                                follow[B] |= follow[A]
+                            for j in range(len(rest)):
+                                if self.EPSILON not in first[rest[j]]:
+                                    break
+                                if j == len(rest) - 1:
+                                    follow[B] |= follow[A]
+                                    follow[B] -= {self.EPSILON}
+                            follow[B] |= first[rest[j]] - {self.EPSILON}
+        return follow
 
-    def is_terminal(self, symbol):
-        return symbol in self.terminals
+    def build_ll1_table(self):
+        first = self.calculate_first()
+        follow = self.calculate_follow(first)
+        ll1_table = {}
 
-    def is_start_symbol(self, symbol):
-        return symbol == self.start_symbol
+        for A in self.N:
+            for alpha in self.P[A]:
+                first_alpha = set()
+                i = 0
+                while i < len(alpha):
+                    B = alpha[i]
+                    first_alpha |= first[B]
+                    if self.EPSILON not in first[B]:
+                        break
+                    i += 1
+                else:
+                    first_alpha.add(self.EPSILON)
 
-    def is_cfg(self):
-        for nonterminal, productions in self.productions.items():
-            for production in productions:
-                if not production[0].isupper():
-                    return False  # CFG productions must start with a nonterminal
+                for terminal in first_alpha:
+                    if terminal != self.EPSILON:
+                        ll1_table[(A, terminal)] = alpha
+
+                if self.EPSILON in first_alpha:
+                    for terminal in follow[A]:
+                        ll1_table[(A, terminal)] = alpha
+
+        return ll1_table
+
+    def check_ll1(self):
+        ll1_table = self.build_ll1_table()
+        for key in ll1_table:
+            if ll1_table[key] != [self.EPSILON]:
+                return False
         return True
 
+    def checkCFG(self):
+        hasStartingSymbol = False
+        for key in self.P.keys():
+            if key == self.S:
+                hasStartingSymbol = True
+            if key not in self.N:
+                return False
+        if not hasStartingSymbol:
+            return False
+        for A in self.N:
+            if not self.isCFG(A):
+                return False
+        return True
 
-# Example usage:
-if _name_ == "_main_":
-    grammar = Grammar()
-    grammar.read_grammar_from_file("your_grammar_file.txt")
+    def isCFG(self, A):
+        for alpha in self.P[A]:
+            for symbol in alpha:
+                if symbol not in self.N and symbol not in self.E and symbol != self.EPSILON:
+                    return False
+        return True
 
-    grammar.print_nonterminals()
-    grammar.print_terminals()
-    grammar.print_productions()
+    def __str__(self):
+        result = "N = " + str(self.N) + "\n"
+        result += "E = " + str(self.E) + "\n"
+        result += "S = " + str(self.S) + "\n"
+        result += "P = " + str(self.P) + "\n"
+        return result
 
-    # Example: Get productions for a given nonterminal
-    nonterminal = 'S'
-    print(f"Productions for {nonterminal}: {grammar.productions_for_nonterminal(nonterminal)}")
 
-    # Example: Check if a symbol is a nonterminal or terminal
-    symbol = 'A'
-    print(f"{symbol} is a nonterminal: {grammar.is_nonterminal(symbol)}")
-    print(f"{symbol} is a terminal: {grammar.is_terminal(symbol)}")
-
-    # Example: Check if a symbol is the start symbol
-    print(f"{symbol} is the start symbol: {grammar.is_start_symbol(symbol)}")
-
-    # Example: Check if the grammar is a CFG
-    print(f"Is the grammar a CFG: {grammar.is_cfg()}")
+g = Grammar()
+g.readFromFile("g1.txt")
+print(str(g))
+if g.checkCFG():
+    print("The grammar is a CFG")
+else:
+    print("The grammar is not a CFG")
