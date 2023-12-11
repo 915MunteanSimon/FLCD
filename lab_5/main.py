@@ -151,11 +151,19 @@ class Grammar:
 
     def checkCFG(self):
         hasStartingSymbol = False
+        productions = set()  # Store unique productions
         for key in self.P.keys():
             if key == self.S:
                 hasStartingSymbol = True
             if key not in self.N:
                 return False
+            for prod in self.P[key]:
+                prod_str = ''.join(prod)
+                if prod_str in productions:
+                    if prod_str != self.EPSILON or any(symbol in self.N for symbol in prod_str):
+                        return False  # Duplicate is epsilon or involves non-terminals
+                    return False  # Duplicate production found
+                productions.add(prod_str)
         if not hasStartingSymbol:
             return False
         for A in self.N:
@@ -164,10 +172,17 @@ class Grammar:
         return True
 
     def isCFG(self, A):
+        productions = set()  # Store unique productions
         for alpha in self.P[A]:
+            prod_str = ''.join(alpha)
+            if prod_str in productions:
+                if prod_str != self.EPSILON or any(symbol in self.N for symbol in alpha):
+                    return False  # Duplicate is epsilon or involves non-terminals
+                return False  # Other duplicate found
             for symbol in alpha:
                 if symbol not in self.N and symbol not in self.E and symbol != self.EPSILON:
                     return False
+            productions.add(prod_str)
         return True
 
     def __str__(self):
@@ -179,7 +194,7 @@ class Grammar:
 
 
 g = Grammar()
-g.readFromFile("g2.txt")
+g.readFromFile("g1.txt")
 print(str(g))
 if g.checkCFG():
     print("The grammar is a CFG")
