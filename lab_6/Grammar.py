@@ -55,34 +55,39 @@ class Grammar:
             self.P = P
 
     def eliminate_left_recursion(self):
-        for A in self.N:
-            for i in range(self.N.index(A)):
-                B = self.N[i]
-                if (A, B) in self.P:
-                    alpha = self.P[(A, B)]
-                    self.P.pop((A, B))
-                    for beta in self.P[B]:
-                        self.P.setdefault(A, []).extend(beta + alpha if beta != [self.EPSILON] else alpha)
+        for i, A in enumerate(self.N):
+            for j in range(i):
+                B = self.N[j]
+                for alpha in self.P[A]:
+                    if alpha[0] == B:
+                        self.P[A].remove(alpha)
+                        for beta in self.P[B]:
+                            self.P.setdefault(A + "'", []).append(beta + alpha[1:] if alpha[1:] else [self.EPSILON])
 
     def factorize(self):
         for A in self.N:
-            prods = self.P[A]
+            prods = self.P.get(A, [])
             i = 0
             while i < len(prods):
                 current_prod = prods[i]
                 if len(current_prod) > 1:
                     for j in range(1, len(current_prod)):
                         new_nonterminal = f"{A}factored{j}"
-                        if (new_nonterminal, current_prod[j]) not in self.P:
-                            self.P[(new_nonterminal, current_prod[j])] = [current_prod[j]]
+                        if new_nonterminal not in self.N:
+                            self.N.append(new_nonterminal)
+                        if A not in self.P:
+                            self.P[A] = []
+
+                        if new_nonterminal not in self.P:
+                            self.P[new_nonterminal] = [current_prod[j]]
                         prods[i][j] = new_nonterminal
-                        A = new_nonterminal  # This was indented incorrectly
-                i += 1  # This was outside the loop
+                i += 1
 
     def calculate_first(self):
         first = {}
         for A in self.N:
             first[A] = set()
+
         for a in self.E:
             first[a] = set([a])
 
@@ -242,11 +247,11 @@ if __name__ == '__main__':
 
     # Print the initial state of the grammar
     print("Initial Grammar:")
-    print(grammar)
     print("Is CFG:", grammar.checkCFG())
 
     # Eliminate left recursion and factorize the grammar
     grammar.eliminate_left_recursion()
+    print(grammar)
     grammar.factorize()
 
     # Print the grammar after left recursion elimination and factorization
@@ -270,5 +275,3 @@ if __name__ == '__main__':
     print("\nLL(1) Parsing Table:")
     for non_terminal, row in ll1_table.items():
         print(f"{non_terminal}: {row}")
-    #Print if its CFG and LL(1)
-    print("Is LL(1):", grammar.check_ll1())
