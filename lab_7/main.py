@@ -147,14 +147,19 @@ class Grammar:
 
                 for terminal in first_alpha:
                     if terminal != self.EPSILON:
-                        ll1_table[A][terminal] = alpha
+                        if ll1_table[A][terminal] is None:
+                            ll1_table[A][terminal] = alpha
+                        else:
+                            # Conflict detected
+                            print(f"Conflict at ({A}, {terminal}): {ll1_table[A][terminal]} vs {alpha}")
 
                 if self.EPSILON in first_alpha:
                     for terminal in follow[A]:
-                        if ll1_table[A][terminal] is not None:
-                            # Conflict: Table cell already populated
+                        if ll1_table[A][terminal] is None:
+                            ll1_table[A][terminal] = alpha
+                        else:
+                            # Conflict detected
                             print(f"Conflict at ({A}, {terminal}): {ll1_table[A][terminal]} vs {alpha}")
-                        ll1_table[A][terminal] = alpha
 
         return ll1_table
 
@@ -205,7 +210,6 @@ class ParserOutput:
         self.tree_root = tree_root
 
     def transform_tree_representation(self):
-        # This is a simple example; you may need to customize based on your needs
         transformed_representation = self.__transform_tree(self.tree_root)
         return transformed_representation
 
@@ -221,7 +225,6 @@ class ParserOutput:
         return transformed_node
 
     def print_to_screen(self):
-        # This is a simple example; you may need to customize based on your needs
         self.__print_tree(self.tree_root)
 
     def __print_tree(self, node, depth=0):
@@ -231,7 +234,6 @@ class ParserOutput:
                 self.__print_tree(child, depth + 1)
 
     def print_to_file(self, file_name):
-        # This is a simple example; you may need to customize based on your needs
         with open(file_name, "w") as file:
             self.__write_tree_to_file(file, self.tree_root)
 
@@ -251,7 +253,7 @@ if __name__ == '__main__':
     for key, value in ll1_table.items():
         print(f"{key}: {value}")
 
-    # Perform parsing and create a parse tree (this is just a simple example, you may need to customize)
+    # Perform parsing and create a parse tree
     parse_tree_root = ParseTreeNode("S", [ParseTreeNode("a",[]),ParseTreeNode("A",[ParseTreeNode("b",[]),ParseTreeNode("A",[ParseTreeNode("c",[])])])])
 
     # Create ParserOutput instance with the parse tree
@@ -261,5 +263,8 @@ if __name__ == '__main__':
     transformed_representation = parser_output.transform_tree_representation()
     print("Transformed Tree Representation:")
     print(transformed_representation)
+
+    #print to screen
+    parser_output.print_to_screen()
 
     parser_output.print_to_file("output.txt")
